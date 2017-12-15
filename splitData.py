@@ -2,9 +2,21 @@
 import random
 import os
 import shutil
+from PIL import Image
+import pdb
 
-# split Methods can  'half'
-spiltRatio = 3 / 10 # Test : Total
+
+# crop Google Logo and save to new Destination
+def cropLogoAndSave(source, destinaiton):
+    img = Image.open(i)
+    width = img.size[0]
+    height = img.size[1]
+    imgCrop = img.crop((0, 0, width, height - 20)) # Logo height is approx 20
+    imgCrop.save(destinaiton, "JPEG")
+
+
+# set Ratio of Test images 
+spiltRatio = 1 / 10 # Test : Total
 
 buildings = [os.path.join('./dataset', d) for d in os.listdir('./dataset') if os.path.isdir(os.path.join('./dataset', d))]
 
@@ -19,17 +31,20 @@ os.makedirs('./testSet')
 
 for b in buildings:
     images = [os.path.join(b, i) for i in os.listdir(b) if i.endswith('jpg')]
-    numberOfTestData = int(len(images) * (3 / 10))
+    random.shuffle(images)
+    numberOfTestData = int(len(images) * spiltRatio)
     testData = random.sample(images, numberOfTestData)
     testCount = 1
     trainCount = 1
     for i in images:
         if i in testData:
             dstName = os.path.basename(b) + '_' + str(testCount) + '.jpg'
-            shutil.copy(i, os.path.join('./testSet', dstName))
+            cropLogoAndSave(i, os.path.join('./testSet', dstName))
+            # shutil.copy(i, os.path.join('./testSet', dstName))
             testCount += 1
         else:
             dstName = os.path.basename(b) + '_' + str(trainCount) + '.jpg'
-            shutil.copy(i, os.path.join('./trainingSet', dstName))
+            cropLogoAndSave(i, os.path.join('./trainingSet', dstName))
+            # shutil.copy(i, os.path.join('./trainingSet', dstName))
             trainCount += 1
     print(os.path.basename(b), testCount, trainCount)
