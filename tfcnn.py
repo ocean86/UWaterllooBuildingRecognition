@@ -3,32 +3,34 @@ import time
 import os
 from PIL import Image
 import numpy as np
+import random
+import pdb
 
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+tf.logging.set_verbosity(tf.logging.ERROR)
 
 # Parameter definitions
 image_size = 600 * (400 - 20)
 labels_size = 3
 labelDict = {'dc':0, 'mc':1, 'm3':2}
 # Change below
-batch_size = 10
-max_steps = 100
-hidden_layers = [64, 32]
+batch_size = 300
+max_steps = 50
+hidden_layers = [128, 128]
 
 def getTrainingData():
     images = []
     labels = []
-    for i in os.listdir('./trainingSet'):
+    items = os.listdir('./trainingSet')
+    random.shuffle(items)
+    for i in items:
         label = labelDict[os.path.basename(i)[:2]]
         #file = tf.read_file(os.path.join('./trainingSet', i))
         #img = tf.image.decode_jpeg(file, channels=3)
         #data = tf.image.convert_image_dtype(img, tf.float32)
         img = Image.open(os.path.join('./trainingSet', i))
         img.load()
-        img = np.asarray(img, dtype="float32")
-        #
-        img = img.reshape(image_size, 3)
-        #pdb.set_trace()
+        img = np.asarray(img, dtype="float32").flatten()
+        #img = img.reshape(image_size, 3)
         labels.append(label)
         images.append(img)
 
@@ -40,17 +42,17 @@ def getTrainingData():
 def getTestingData():
     images = []
     labels = []
-    for i in os.listdir('./testSet'):
+    items = os.listdir('./testSet')
+    random.shuffle(items)
+    for i in items:
         label = labelDict[os.path.basename(i)[:2]]
         #file = tf.read_file(os.path.join('./trainingSet', i))
         #img = tf.image.decode_jpeg(file, channels=3)
         #data = tf.image.convert_image_dtype(img, tf.float32)
         img = Image.open(os.path.join('./testSet', i))
         img.load()
-        img = np.asarray(img, dtype="float32")
-        #
-        img = img.reshape(image_size, 3)
-        #pdb.set_trace()
+        img = np.asarray(img, dtype="float32").flatten()
+        #img = img.reshape(image_size, 3)
         labels.append(label)
         images.append(img)
 
@@ -64,7 +66,7 @@ def getFittingData(training_data, training_labels):
     for i in np.random.choice(len(training_data), int(len(training_data) * 0.2)):
         images.append(training_data[i])
         labels.append(training_labels[i])
-    print(len(images), print(len(labels)))
+    # print(len(images), print(len(labels)))
     return np.asarray(images), np.asarray(labels)
 
 
@@ -75,9 +77,9 @@ def main():
     testing_data, testing_labels = getTestingData()
     fitting_data, fitting_labels = getFittingData(training_data, training_labels)
     print("Data Prepared.")
-    #pdb.set_trace()
+
     # Define the Estimator
-    feature_columns = [tf.feature_column.numeric_column("", shape=[228000,3])]
+    feature_columns = [tf.feature_column.numeric_column("", shape=[684000])]
     classifier = tf.contrib.learn.DNNClassifier(feature_columns=feature_columns,
                                               hidden_units=hidden_layers,
                                               n_classes=labels_size,
@@ -92,9 +94,17 @@ def main():
     # On Training imgaes:
     test_accuracy = classifier.evaluate(x=fitting_data, y=fitting_labels, steps=1)["accuracy"]
     print("\nExample accuracy: %g %%" % (test_accuracy * 100))
+    predictions = list(classifier.predict(x=fitting_data))
+    labels = list(fitting_labels)
+    print("Prediction:" + str(predictions))
+    print("True Value:" + str(labels))
     # On Testing images
     test_accuracy = classifier.evaluate(x=testing_data, y=testing_labels, steps=1)["accuracy"]
     print("\nTesting Data accuracy: %g %%" % (test_accuracy * 100))
+    #predictions = list(classifier.predict(x=testing_data))
+    #labels = list(testing_labels)
+    #print("Prediction:" + str(predictions))
+    #print("True Value:" + str(labels))
 
     endTime = time.time()
     print('Total time: {:5.2f}s'.format(endTime - beginTime))
