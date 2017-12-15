@@ -24,3 +24,9 @@ hidden_layers = [64, 32]
 **hidden_layers** 表示有多少个hidden layers. 每个hidden layers有多少个node. [64, 32] 表示这个NN有两个layers, 第一个layer有64个nodes, 第二个32个nodes.
 理论上单层nodes越多越好.但我试着run了个单层的1024个node, [1024], 要很长时间，硬盘都满了。
 
+### 4. Observe Accuracy
+After training is finished, it will run against two sets of data. The first set is randomly drawn from training_data, producing **Example Accuracy**. The second is from testing data which should never be seen by the model, producing **Testing Data accuracy**
+
+### 5. ReRun
+The trained model is saved in **UWMathBuilding_model** folder. To rerun the process, you might need to clear this folder first. Otherwise may produce error. 
+
