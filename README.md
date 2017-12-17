@@ -7,7 +7,7 @@ A machine learning project to recognize UWaterloo buildings from pictures.
 
 ### 2. create training & testing dataset by: 
 ```bash
-python spiltData.py
+python splitData.py
 ```
 The default ratio of Test:Train is 1:9. You can change it inside the python file.
 
