@@ -9,13 +9,14 @@ import pdb
 tf.logging.set_verbosity(tf.logging.ERROR)
 
 # Parameter definitions
-image_size = 600 * (400 - 20)
+#image_size = 600 * (400 - 20)
+image_size = 160 * 100
 labels_size = 3
-labelDict = {'dc':0, 'mc':1, 'm3':2}
+labelDict = {'mc':0, 'm3':1, 'dc':2}
 # Change below
-batch_size = 300
-max_steps = 50
-hidden_layers = [128, 128]
+batch_size = 200
+max_steps = 20
+hidden_layers = [100, 100]
 
 def getTrainingData():
     images = []
@@ -30,7 +31,8 @@ def getTrainingData():
         img = Image.open(os.path.join('./trainingSet', i))
         img.load()
         img = np.asarray(img, dtype="float32").flatten()
-        #img = img.reshape(image_size, 3)
+        #img.flatten()
+        img = img.reshape(image_size, 3)
         labels.append(label)
         images.append(img)
 
@@ -52,7 +54,8 @@ def getTestingData():
         img = Image.open(os.path.join('./testSet', i))
         img.load()
         img = np.asarray(img, dtype="float32").flatten()
-        #img = img.reshape(image_size, 3)
+        #img.flatten()
+        img = img.reshape(image_size, 3)
         labels.append(label)
         images.append(img)
 
@@ -79,7 +82,8 @@ def main():
     print("Data Prepared.")
 
     # Define the Estimator
-    feature_columns = [tf.feature_column.numeric_column("", shape=[684000])]
+    feature_columns = [tf.feature_column.numeric_column("", shape=[image_size, 3])]
+    # feature_columns = [tf.feature_column.numeric_column("", shape=[image_size * 3])]
     classifier = tf.contrib.learn.DNNClassifier(feature_columns=feature_columns,
                                               hidden_units=hidden_layers,
                                               n_classes=labels_size,
@@ -101,10 +105,10 @@ def main():
     # On Testing images
     test_accuracy = classifier.evaluate(x=testing_data, y=testing_labels, steps=1)["accuracy"]
     print("\nTesting Data accuracy: %g %%" % (test_accuracy * 100))
-    #predictions = list(classifier.predict(x=testing_data))
-    #labels = list(testing_labels)
-    #print("Prediction:" + str(predictions))
-    #print("True Value:" + str(labels))
+    predictions = list(classifier.predict(x=testing_data))
+    labels = list(testing_labels)
+    print("Prediction:" + str(predictions))
+    print("True Value:" + str(labels))
 
     endTime = time.time()
     print('Total time: {:5.2f}s'.format(endTime - beginTime))

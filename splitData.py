@@ -12,6 +12,7 @@ def cropLogoAndSave(source, destinaiton):
     width = img.size[0]
     height = img.size[1]
     imgCrop = img.crop((0, 0, width, height - 20)) # Logo height is approx 20
+    imgCrop = imgCrop.resize((160, 100))
     imgCrop.save(destinaiton, "JPEG")
 
 
